@@ -14,6 +14,8 @@ exam_points = {
   "Agnieszka":15
 }
 
+print('Text')
+
 failed_students = []
 top_students = []
 best_student = []
