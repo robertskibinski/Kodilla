@@ -90,3 +90,75 @@ def add_machine(conn, machine):
     cur.execute(sql, machine)
     conn.commit()
     return cur.lastrowid
+
+
+def select_machines_by_kind(conn, kind):
+    """
+    Query kiind by kind
+    :param conn:
+    :param kind:
+    :return:
+    """
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM machines WHERE kind=?", (kind,))
+    rows = cur.fetchall()
+    return rows
+
+
+def select_all(conn, table):
+    """
+    Query all rows in the table
+    :param conn:
+    :param table:
+    :return:
+    """
+    cur=conn.cursor()
+    cur.execute(f"SELECT * FROM {table}")
+    rows = cur.fetchall()
+    return rows
+
+
+def select_where_parametr(conn, table, **query):
+    """
+    Query tasks from table with data from **query dict
+    :param conn:
+    :param table:
+    :param query:
+    :return:
+    """
+    cur = conn.cursor()
+    qs = []
+    values = ()
+    for k, v in query.items():
+        qs.append(f'{k}=?')
+        values += (v,)
+    q = " AND ".join(qs)
+    cur.execute(f'SELECT * FROM {table} WHERE {q}', values)
+    rows = cur.fetchall()
+    return rows
+
+
+def update(conn, table, id, **kwargs):
+    """
+    update all parameters of a machine
+    :param conn:
+    :param table:
+    :param id:
+    :param kwargs:
+    :return:
+    """
+    parameters = [f'{k} = ?' for k in kwargs]
+    parameters = ', '.join(parameters)
+    values = tuple(v for v in kwargs.values())
+    values += (id, )
+    sql = f'''
+    UPDATE {table}
+    SET {parameters}
+    WHERE id = ?
+    '''
+    try:
+        cur = conn.cursor()
+        cur.execute(sql, values)
+        conn.commit()
+    except sqlite3.OperationalError as e:
+        print(e)
