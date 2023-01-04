@@ -21,21 +21,20 @@ def create_connection(db_file):
 
 def execute_sql(conn_sql):
     """ Execute sql
-        :param conn: Connection object
-        :param sql: a SQL script
+        :param conn_sql: Connection object
         :return:
     """
     try:
         c = conn.cursor()
-        c.execute(sql)
+        c.execute(conn_sql)
     except Error as e:
         print(e)
-        
+
 
 if __name__ == '__main__':
     create_machine_sql = """
     --machine table
-    CREATE TABLE IF NOT EXIST rsk_mach (
+    CREATE TABLE  rsk_mach (
     id integer PRIMARY KEY
     ,machine_id integer NOT_NULL
     ,machine_name text
@@ -53,7 +52,7 @@ if __name__ == '__main__':
     """
     create_casting_machine_sql = """
     --machine for casting
-    CREATE TABLE IF NOT EXIST rsk_cast_mach (
+    CREATE TABLE  rsk_cast_mach (
     id integer PRIMARY KEY
     ,casting_machine_id integer NOT NULL
     ,casting_machine_name text
@@ -66,11 +65,11 @@ if __name__ == '__main__':
     db_file = 'kokile_machines.db'
     conn = create_connection(db_file)
     if conn is not None:
-        execute_sql(conn, create_machine_sql)
-        execute_sql(conn, create_casting_machine_sql)
+        execute_sql(create_machine_sql)
+        execute_sql(create_casting_machine_sql)
         conn.close()
-        
-        
+
+
 def add_machine(conn, machine):
     """
     Create new machine into machine table
@@ -112,7 +111,7 @@ def select_all(conn, table):
     :param table:
     :return:
     """
-    cur=conn.cursor()
+    cur = conn.cursor()
     cur.execute(f"SELECT * FROM {table}")
     rows = cur.fetchall()
     return rows
@@ -150,7 +149,7 @@ def update(conn, table, id, **kwargs):
     parameters = [f'{k} = ?' for k in kwargs]
     parameters = ', '.join(parameters)
     values = tuple(v for v in kwargs.values())
-    values += (id, )
+    values += (id,)
     sql = f'''
     UPDATE {table}
     SET {parameters}
@@ -162,3 +161,15 @@ def update(conn, table, id, **kwargs):
         conn.commit()
     except sqlite3.OperationalError as e:
         print(e)
+        
+        
+def delete(conn, table, id):
+    """
+    delete item of a machine
+    :param conn:
+    :param table
+    :param id:
+    :return
+    """
+    cur = conn.cursor()
+    cur.execute(f'''DELETE FROM {table} WHERE id={id}''')
